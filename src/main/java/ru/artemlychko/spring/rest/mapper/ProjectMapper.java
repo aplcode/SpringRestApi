@@ -1,14 +1,19 @@
 package ru.artemlychko.spring.rest.mapper;
 
 import org.mapstruct.Mapper;
-import org.springframework.stereotype.Component;
-import ru.artemlychko.spring.rest.dto.ProjectDTO;
+import org.mapstruct.Mapping;
+import ru.artemlychko.spring.rest.dto.*;
+import ru.artemlychko.spring.rest.entity.Employee;
 import ru.artemlychko.spring.rest.entity.Project;
 
-@Mapper(componentModel = "spring")
-@Component
-public interface ProjectMapper {
-    ProjectDTO toDto(Project project);
+import java.util.List;
 
-    Project toEntity(ProjectDTO projectDTO);
+@Mapper(uses = EmployeeMapper.class, componentModel = "spring")
+public interface ProjectMapper {
+    Project toProject(ProjectCreateDto dto);
+
+    ProjectUpdateDto toProjectUpdateDto(Project project);
+
+    @Mapping(source = "employeeList", target = "employeeList")
+    ProjectResponseDto toProjectResponseDto(Project project);
 }

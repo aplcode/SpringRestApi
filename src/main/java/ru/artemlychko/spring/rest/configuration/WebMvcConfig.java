@@ -10,8 +10,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @EnableWebMvc
-@EnableJpaRepositories(basePackages = "ru.artemlychko.spring.rest.repository")
-@ComponentScan(basePackages = "ru.artemlychko.spring.rest")
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Bean

@@ -1,15 +1,16 @@
 package ru.artemlychko.spring.rest.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.artemlychko.spring.rest.dto.EmployeeDTO;
+import ru.artemlychko.spring.rest.dto.EmployeeCreateDto;
+import ru.artemlychko.spring.rest.dto.EmployeeResponseDto;
+import ru.artemlychko.spring.rest.dto.EmployeeUpdateDto;
 import ru.artemlychko.spring.rest.entity.Employee;
+import ru.artemlychko.spring.rest.exceptions.NoSuchElementException;
 import ru.artemlychko.spring.rest.mapper.EmployeeMapper;
 import ru.artemlychko.spring.rest.repository.EmployeeRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,39 +25,36 @@ public class EmployeeService {
         this.employeeMapper = employeeMapper;
     }
 
-    public EmployeeDTO getEmployeeById(Long id) {
+    public EmployeeResponseDto getEmployeeById(Long id) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Employee not found"));
-        return employeeMapper.toDto(employee);
+                new NoSuchElementException("Employee with id " + id + " not found"));
+        return employeeMapper.toEmployeeResponseDto(employee);
     }
 
-    public List<EmployeeDTO> getAllEmployees() {
-        List<EmployeeDTO> employeeDTOList = employeeRepository.findAll().stream()
-                .map(employeeMapper::toDto)
-                .collect(Collectors.toList());
-        if (employeeDTOList.isEmpty()) {
-            throw new IllegalArgumentException("List is empty");
-        }
-        return employeeDTOList;
+    public List<EmployeeResponseDto> getAllEmployees() {
+        return employeeRepository.findAll().stream()
+                .map(employeeMapper::toEmployeeResponseDto)
+                .toList();
     }
 
-    public void createEmployee(EmployeeDTO employeeDTO) {
-        Employee employee = employeeMapper.toEntity(employeeDTO);
+    public void createEmployee(EmployeeCreateDto employeeCreateDto) {
+        Employee employee = employeeMapper.toEmployee(employeeCreateDto);
         if (employee.getFirstName() == null || employee.getLastName() == null) {
             throw new IllegalArgumentException("Employee fields cannot be empty");
         }
         employeeRepository.save(employee);
     }
 
-    public void updateEmployee(Long id, EmployeeDTO employeeDTO) {
-        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(
-                String.format("Employee with id '%s' not found", id))
+    public void updateEmployee(EmployeeUpdateDto employeeUpdateDto) {
+        Employee employee = employeeRepository.findById(employeeUpdateDto.getId()).orElseThrow(() -> new NoSuchElementException(
+                String.format("Employee with id '%s' not found", employeeUpdateDto.getId()))
         );
-        if (employee.getFirstName() != null) {
-            employee.setFirstName(employeeDTO.getFirstName());
-        }
-        if (employee.getLastName() != null) {
-            employee.setLastName(employeeDTO.getLastName());
+        if (employeeUpdateDto.getFirstName() == null || employeeUpdateDto.getLastName() == null || employeeUpdateDto.getDepartment() == null) {
+            throw new IllegalArgumentException("Employee fields cannot be empty");
+        } else {
+            employee.setFirstName(employeeUpdateDto.getFirstName());
+            employee.setLastName(employeeUpdateDto.getLastName());
+            employee.setDepartment(employeeUpdateDto.getDepartment());
         }
         employeeRepository.save(employee);
     }
@@ -65,7 +63,7 @@ public class EmployeeService {
         if (employeeRepository.findById(id).isPresent()) {
             employeeRepository.deleteById(id);
         } else {
-            throw new IllegalArgumentException(String.format("Employee with id '%s' not found", id));
+            throw new NoSuchElementException("Employee with id " + id + " not found");
         }
     }
 }

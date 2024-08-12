@@ -1,10 +1,12 @@
 package ru.artemlychko.spring.rest.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.artemlychko.spring.rest.dto.DepartmentDTO;
+import ru.artemlychko.spring.rest.dto.DepartmentCreateDto;
+import ru.artemlychko.spring.rest.dto.DepartmentResponseDto;
+import ru.artemlychko.spring.rest.dto.DepartmentUpdateDto;
 import ru.artemlychko.spring.rest.service.DepartmentService;
 
 import java.util.List;
@@ -13,56 +15,37 @@ import java.util.List;
 @RequestMapping("/api")
 public class DepartmentController {
 
-    @Autowired
-    private DepartmentService departmentService;
+    private final DepartmentService departmentService;
 
-    @GetMapping(value = "/departments/{id}", produces = "application/json")
-    public ResponseEntity<?> getDepartmentById(@PathVariable Long id) {
-        try {
-            DepartmentDTO departmentDTO = departmentService.getDepartmentById(id);
-            return ResponseEntity.ok(departmentDTO);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public DepartmentController(DepartmentService departmentService) {
+        this.departmentService = departmentService;
     }
 
-    @GetMapping(value = "/departments/all", produces = "application/json")
-    public ResponseEntity<?> getAllDepartments() {
-        try {
-            List<DepartmentDTO> departmentDTOList = departmentService.getAllDepartments();
-            return ResponseEntity.ok(departmentDTOList);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping(value = "/departments/{id}")
+    public DepartmentResponseDto getDepartmentById(@PathVariable("id") Long id) {
+           return departmentService.getDepartmentById(id);
     }
 
-    @PostMapping(consumes = "application/json")
-    public ResponseEntity<?> createDepartment(@RequestBody DepartmentDTO departmentDTO) {
-        try {
-            departmentService.createDepartment(departmentDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    @GetMapping(value = "/departments/all")
+    public List<DepartmentResponseDto> getAllDepartments() {
+        return departmentService.getAllDepartments();
     }
 
-    @PutMapping(consumes = "application/json")
-    public ResponseEntity<?> updateDepartment(@RequestBody DepartmentDTO departmentDTO) {
-        try {
-            departmentService.updateDepartment(departmentDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping(value = "/departments")
+    public String createDepartment(@RequestBody DepartmentCreateDto departmentCreateDto) {
+        departmentService.createDepartment(departmentCreateDto);
+        return "Department with name " + departmentCreateDto.getName() + " was created";
+    }
+
+    @PutMapping(value = "/departments")
+    public String updateDepartment(@RequestBody DepartmentUpdateDto departmentUpdateDto) {
+        departmentService.updateDepartment(departmentUpdateDto);
+        return "Department with id " + departmentUpdateDto.getId() + " was updated";
     }
 
     @DeleteMapping("/departments/{id}")
-    public ResponseEntity<?> deleteDepartment(@PathVariable Long id) {
-        try {
-            departmentService.deleteDepartment(id);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public String deleteDepartment(@PathVariable("id") Long id) {
+        departmentService.deleteDepartment(id);
+        return "Department with id " + id + " was deleted";
     }
 }

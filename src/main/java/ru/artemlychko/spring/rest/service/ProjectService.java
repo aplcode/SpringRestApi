@@ -1,15 +1,16 @@
 package ru.artemlychko.spring.rest.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.artemlychko.spring.rest.dto.ProjectDTO;
+import ru.artemlychko.spring.rest.dto.ProjectCreateDto;
+import ru.artemlychko.spring.rest.dto.ProjectResponseDto;
+import ru.artemlychko.spring.rest.dto.ProjectUpdateDto;
 import ru.artemlychko.spring.rest.entity.Project;
+import ru.artemlychko.spring.rest.exceptions.NoSuchElementException;
 import ru.artemlychko.spring.rest.mapper.ProjectMapper;
 import ru.artemlychko.spring.rest.repository.ProjectRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,36 +25,31 @@ public class ProjectService {
         this.projectMapper = projectMapper;
     }
 
-    public ProjectDTO getProjectById(Long id) {
-        Project project = projectRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Project not found"));
-        return projectMapper.toDto(project);
+    public ProjectResponseDto getProjectById(Long id) {
+        return projectMapper.toProjectResponseDto(projectRepository.findById(id).orElseThrow(()->
+                new NoSuchElementException("Project with id " + id + " not found")));
     }
 
-    public List<ProjectDTO> getAllProjects() {
-        List<ProjectDTO> projectDTOList = projectRepository.findAll().stream()
-                .map(projectMapper::toDto)
-                .collect(Collectors.toList());
-        if (projectDTOList.isEmpty()) {
-            throw new IllegalArgumentException("List is empty");
-        }
-        return projectDTOList;
+    public List<ProjectResponseDto> getAllProjects() {
+        return projectRepository.findAll().stream()
+                .map(projectMapper::toProjectResponseDto)
+                .toList();
     }
 
-    public void createProject(ProjectDTO projectDTO) {
-        Project project = projectMapper.toEntity(projectDTO);
+    public void createProject(ProjectCreateDto projectCreateDto) {
+        Project project = projectMapper.toProject(projectCreateDto);
         if (project.getName() == null) {
             throw new IllegalArgumentException("Project fields cannot be empty");
         }
         projectRepository.save(project);
     }
 
-    public void updateProject(Long id, ProjectDTO projectDTO) {
-        Project project = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(
-                String.format("Project with id '%s' not found", id))
+    public void updateProject(ProjectUpdateDto projectUpdateDto) {
+        Project project = projectRepository.findById(projectUpdateDto.getId()).orElseThrow(() -> new NoSuchElementException(
+                String.format("Project with id '%s' not found", projectUpdateDto.getId()))
         );
-        if (project.getName() != null) {
-            project.setName(projectDTO.getName());
+        if (projectUpdateDto.getName() != null) {
+            project.setName(projectUpdateDto.getName());
         }
         projectRepository.save(project);
     }
@@ -62,7 +58,7 @@ public class ProjectService {
         if (projectRepository.findById(id).isPresent()) {
             projectRepository.deleteById(id);
         } else {
-            throw new IllegalArgumentException(String.format("Project with id '%s' not found", id));
+            throw new NoSuchElementException("Project with id " + id + " not found");
         }
     }
 }

@@ -1,14 +1,17 @@
 package ru.artemlychko.spring.rest.mapper;
 
 import org.mapstruct.Mapper;
-import org.springframework.stereotype.Component;
-import ru.artemlychko.spring.rest.dto.DepartmentDTO;
+import org.mapstruct.Mapping;
+import ru.artemlychko.spring.rest.dto.DepartmentCreateDto;
+import ru.artemlychko.spring.rest.dto.DepartmentResponseDto;
+import ru.artemlychko.spring.rest.dto.DepartmentUpdateDto;
 import ru.artemlychko.spring.rest.entity.Department;
 
-@Mapper(componentModel = "spring")
+@Mapper(uses = EmployeeMapper.class, componentModel = "spring")
 public interface DepartmentMapper {
 
-    DepartmentDTO toDto(Department department);
+    Department toDepartment(DepartmentCreateDto dto);
 
-    Department toEntity(DepartmentDTO departmentDTO);
+    @Mapping(source = "employeeList", target = "employeeList")
+    DepartmentResponseDto toDepartmentResponseDto(Department department);
 }

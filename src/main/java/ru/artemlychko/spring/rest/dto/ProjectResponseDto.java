@@ -4,19 +4,20 @@ import ru.artemlychko.spring.rest.entity.Employee;
 
 import java.util.List;
 
-public class DepartmentDTO {
+public class ProjectResponseDto {
     private Long id;
 
     private String name;
 
-    private List<Employee> employeeList;
+    private List<EmployeeUpdateDto> employeeList;
 
-    public DepartmentDTO() {
+    public ProjectResponseDto() {
     }
 
-    public DepartmentDTO(Long id, String name) {
+    public ProjectResponseDto(Long id, String name, List<EmployeeUpdateDto> employeeList) {
         this.id = id;
         this.name = name;
+        this.employeeList = employeeList;
     }
 
     public Long getId() {
@@ -35,11 +36,11 @@ public class DepartmentDTO {
         this.name = name;
     }
 
-    public List<Employee> getEmployeeList() {
+    public List<EmployeeUpdateDto> getEmployeeList() {
         return employeeList;
     }
 
-    public void setEmployeeList(List<Employee> employeeList) {
+    public void setEmployeeList(List<EmployeeUpdateDto> employeeList) {
         this.employeeList = employeeList;
     }
 }

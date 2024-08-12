@@ -15,8 +15,8 @@ public class Project {
     @Column(name = "project_name")
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
-    @JoinTable(name = "employee_project"
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "employees_projects"
     , joinColumns = @JoinColumn(name = "project_id")
     , inverseJoinColumns = @JoinColumn(name = "employee_id"))
     private List<Employee> employeeList;

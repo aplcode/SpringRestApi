@@ -18,12 +18,11 @@ public class Employee {
     @Column(name = "employee_lastname")
     private String lastName;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "department_id")
-    private Department department;
+    @Column(name = "department")
+    private Long department;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
-    @JoinTable(name = "employee_project"
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "employees_projects"
     , joinColumns = @JoinColumn(name = "employee_id")
     , inverseJoinColumns = @JoinColumn(name = "project_id"))
     private List<Project> projectList;
@@ -32,7 +31,7 @@ public class Employee {
 
     }
 
-    public Employee(Long id, String firstName, String lastName, Department department) {
+    public Employee(Long id, String firstName, String lastName, Long department) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -71,11 +70,11 @@ public class Employee {
         this.projectList = projectList;
     }
 
-    public Department getDepartment() {
+    public Long getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) {
+    public void setDepartment(Long department) {
         this.department = department;
     }
 }
